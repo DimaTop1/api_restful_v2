@@ -20,8 +20,8 @@ def abort_if_item_doesnt_exist(name):
     if list(filter(lambda x: x['name'] in name, Items)) == []:
         abort(404, message="There's no such item in the shop {}".format(name))
 def abort_if_item_already_exists(name):
-    if list(filter(lambda x: x['name'] == name, Items)) != []:
-        abort(183, message="Item {} is  already exist".format(name))
+    if list(filter(lambda x: x['name'] in name, Items)) != []:
+        abort(404, message="Item {} is  already exist".format(name))
 #item resource
 class Item(Resource):
     def get(self, name):
@@ -87,17 +87,14 @@ class ItemList(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('name', action='append', help="Name cannot be blank!")
-        parser.add_argument('price', type=float, help="Price cannot be blank!")
+        parser.add_argument('items', type=dict, action='append', help="Name cannot be blank!")
         args = parser.parse_args()
-        print(args)
         added = []
-        for i in range(len(args)):
-            abort_if_item_already_exists(args['name'][i])
-            item = args[i]
+        for i in range(len(args['items'])):
+            abort_if_item_already_exists(args['items'][i]['name'])
+            item = args['items'][i]
             Items.append(item)
             added.append(item)
-
         return added, 201
 
 api.add_resource(ItemList, '/items')
