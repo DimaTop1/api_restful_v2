@@ -4,25 +4,32 @@ from flask_restful import reqparse, abort, Api, Resource
 app = Flask(__name__)
 api = Api(app)
 
+
 class HelloWorld(Resource):
     def get(self):
         return {'hello': 'world'}
 
+
 api.add_resource(HelloWorld, '/')
 
-
 Items = [
-    {'name':'chair','price':500},
-    {'name':'phone','price':10000},
-    {'name':'watch','price':1000}
+    {'name': 'chair', 'price': 500},
+    {'name': 'phone', 'price': 10000},
+    {'name': 'watch', 'price': 1000}
 ]
+
+
 def abort_if_item_doesnt_exist(name):
     if list(filter(lambda x: x['name'] in name, Items)) == []:
         abort(404, message="There's no such item in the shop {}".format(name))
+
+
 def abort_if_item_already_exists(name):
     if list(filter(lambda x: x['name'] in name, Items)) != []:
-        abort(404, message="Item {} is  already exist".format(name))
-#item resource
+        abort(404, message="Item {} already exists".format(name))
+
+
+# item resource
 class Item(Resource):
     def get(self, name):
         abort_if_item_doesnt_exist(name)
@@ -41,11 +48,11 @@ class Item(Resource):
         abort_if_item_already_exists(name)
         parser = reqparse.RequestParser()
         parser.add_argument('price', type=float, required=True,
-        help="Price cannot be blank!")
+                            help="Price cannot be blank!")
         args = parser.parse_args()
         print(args)
         item = {
-            'name': name, 'price':args['price']
+            'name': name, 'price': args['price']
         }
         Items.append(item)
         return item, 201
@@ -72,15 +79,10 @@ class Item(Resource):
         return item, 201
 
 
-
-
-
-
-
 api.add_resource(Item, '/items/<name>')
 
 
-#itemlist resource
+# itemlist resource
 class ItemList(Resource):
     def get(self):
         return Items
@@ -96,6 +98,7 @@ class ItemList(Resource):
             Items.append(item)
             added.append(item)
         return added, 201
+
 
 api.add_resource(ItemList, '/items')
 
